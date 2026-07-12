@@ -1,0 +1,7 @@
+# Ignorar el código fuente y binarios descargados
+src/
+*.tar.gz
+
+# Ignorar archivos temporales
+*.swp
+*~
