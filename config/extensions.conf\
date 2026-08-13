@@ -32,3 +32,4 @@ exten => 1111,n,Hangup()
 ; Cualquier número de 4 dígitos que empiece con 2, se envía por la troncal
 exten => _2XXX,1,Dial(PJSIP/${EXTEN}@trunk-sede2,30,tT)
 exten => _2XXX,n,Hangup()
+
