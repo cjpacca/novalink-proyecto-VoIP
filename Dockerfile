@@ -1,10 +1,10 @@
 # Usamos Ubuntu como sistema base
 FROM ubuntu:22.04
 
-# Evitamos interacciones manuales (como selección de zona horaria) durante la instalación
+# Evitamos interacciones manuales
 ENV DEBIAN_FRONTEND=noninteractive
 
-# 1. Instalamos dependencias del sistema requeridas por Asterisk
+# 1. Instalamos dependencias requeridas
 RUN apt-get update && apt-get install -y \
     build-essential \
     wget \
@@ -17,24 +17,31 @@ RUN apt-get update && apt-get install -y \
     sqlite3 \
     libsqlite3-dev \
     libssl-dev \
+    libsrtp2-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Copiamos el código fuente que ya descargaste hacia dentro del contenedor
-# Nota: Ajustamos el comodín para que coincida con la carpeta de Asterisk 20
+# 2. Copiamos el código fuente hacia dentro del contenedor
 COPY ./src/asterisk-20*/ /usr/src/asterisk/
 
-# 3. Compilamos Asterisk (Preparación, Make y Make Install)
+# 3. Compilamos Asterisk
 WORKDIR /usr/src/asterisk
+RUN make distclean || true
 RUN ./configure
 RUN make menuselect.makeopts
 RUN make
 RUN make install
-# Instalamos los archivos de configuración de muestra básicos
-RUN make samples 
+RUN make samples
 
-# 4. Exponemos los puertos necesarios para la señalización (SIP) y los medios (RTP)
+# 4. Inyectamos configuraciones
+COPY ./config-sergio/ /etc/asterisk/
+
+# 5. Inyectamos los certificados de seguridad
+COPY ./keys/ /etc/asterisk/keys/
+
+# 6. Exponemos los puertos (Puerto 5061 TCP)
 EXPOSE 5060/udp 5060/tcp
+EXPOSE 5061/tcp
 EXPOSE 10000-20000/udp
 
-# 5. Comando por defecto para iniciar Asterisk en primer plano (foreground) para que el contenedor no se apague
+# 7. Comando por defecto
 CMD ["/usr/sbin/asterisk", "-f"]

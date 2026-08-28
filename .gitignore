@@ -5,3 +5,6 @@ src/
 # Ignorar archivos temporales
 *.swp
 *~
+
+# Ignorar certificados/llaves
+keys/
