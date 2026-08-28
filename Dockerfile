@@ -33,7 +33,7 @@ RUN make install
 RUN make samples
 
 # 4. Inyectamos configuraciones
-COPY ./config-sergio/ /etc/asterisk/
+COPY ./config/ /etc/asterisk/
 
 # 5. Inyectamos los certificados de seguridad
 COPY ./keys/ /etc/asterisk/keys/
