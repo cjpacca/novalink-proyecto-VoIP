@@ -8,3 +8,14 @@ src/
 
 # Ignorar certificados/llaves
 keys/
+
+imagenes/
+
+llamadas/
+
+version-antigua/
+
+*.txt
+*.tex
+*.pdf
+*.csv
