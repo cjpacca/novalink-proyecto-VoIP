@@ -48,3 +48,40 @@ Gracias al uso de Volúmenes, si modificas los archivos dentro de tu carpeta loc
 Para que Asterisk aplique los cambios sin apagar el servidor, simplemente ingresa a la consola ejecutando:
 - Para actualizar el Dialplan (extensions.conf): `docker exec pbx-nova asterisk -rx "dialplan reload"`
 - Para actualizar Usuarios y Troncales (pjsip.conf): `docker exec pbx-nova asterisk -rx "pjsip reload"`
+
+### Plantilla para añadir nuevas troncales
+
+#### En PJSIP añadir
+
+[trunk-sede3]
+type=endpoint
+transport=transport-tls
+context=sedes_internas
+disallow=all
+allow=g722
+allow=ulaw
+allow=alaw
+media_encryption=sdes
+aors=trunk-sede3
+
+[trunk-sede3]
+type=aor
+contact=sip:[IP_SEDE_3]:5061
+
+[trunk-sede3]
+type=identify
+endpoint=trunk-sede3
+match=[IP_SEDE_3]
+
+#### En Extensions
+
+; =========================================
+; ENRUTAMIENTO EXTERNO (HACIA SEDE 3)
+; =========================================
+exten => _3XXX,1,Dial(PJSIP/${EXTEN}@trunk-sede3,30,tT)
+exten => _3XXX,n,Hangup() 
+Suponiendo plan de numeracion ejemplo 3001
+
+#### Ejecutar en bash
+sudo docker exec -it novalink asterisk -rx "dialplan reload"
+sudo docker exec -it novalink asterisk -rx "pjsip reload"
