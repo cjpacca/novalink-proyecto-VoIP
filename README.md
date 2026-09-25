@@ -51,8 +51,13 @@ Para que Asterisk aplique los cambios sin apagar el servidor, simplemente ingres
 
 ### Plantilla para añadir nuevas troncales
 
-#### En PJSIP añadir
+Para interconectar una nueva sede (por ejemplo, Sede 3), debes agregar las siguientes configuraciones en sus respectivos archivos.
 
+#### 1. En `pjsip.conf` (Definición de la Troncal)
+
+Añade el siguiente bloque al final del archivo, reemplazando `[IP_SEDE_3]` por la dirección IP de la PBX remota en ZeroTier:
+
+```ini
 [trunk-sede3]
 type=endpoint
 transport=transport-tls
@@ -72,16 +77,25 @@ contact=sip:[IP_SEDE_3]:5061
 type=identify
 endpoint=trunk-sede3
 match=[IP_SEDE_3]
+```
 
-#### En Extensions
+#### 2. En `extensions.conf` (Reglas de Enrutamiento)
 
+Añade la regla de marcado para desviar el tráfico hacia la nueva sede. (Ejemplo asumiendo un plan de numeración de extensiones `3XXX`):
+
+```ini
 ; =========================================
 ; ENRUTAMIENTO EXTERNO (HACIA SEDE 3)
 ; =========================================
 exten => _3XXX,1,Dial(PJSIP/${EXTEN}@trunk-sede3,30,tT)
 exten => _3XXX,n,Hangup() 
-Suponiendo plan de numeracion ejemplo 3001
+```
 
-#### Ejecutar en bash
+#### 3. Ejecutar en bash (Recargar Asterisk)
+
+Para que los cambios surtan efecto sin reiniciar el contenedor, ejecuta:
+
+```bash
 sudo docker exec -it novalink asterisk -rx "dialplan reload"
 sudo docker exec -it novalink asterisk -rx "pjsip reload"
+```
